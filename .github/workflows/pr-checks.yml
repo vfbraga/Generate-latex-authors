@@ -1,0 +1,42 @@
+name: PR checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # Pull requests from anyone but the repository owner may only change authors_db.py
+      - name: Only authors_db.py may be modified
+        if: github.event.pull_request.author_association != 'OWNER'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          others=$(git diff --name-only "$BASE_SHA"..."$HEAD_SHA" | grep -v '^authors_db\.py$' || true)
+          if [ -n "$others" ]; then
+            echo "::error::This pull request changes files other than authors_db.py:"
+            echo "$others"
+            exit 1
+          fi
+
+      - name: Check the database
+        run: python generate_latex_authors.py --check
+
+      - name: Smoke test of all the styles
+        run: |
+          for s in apj_old aa mnras arxiv aastex63 aastex701; do
+            python generate_latex_authors.py --all --style "$s" --no-emails > /dev/null
+          done
