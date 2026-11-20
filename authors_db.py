@@ -389,7 +389,7 @@ AUTHORS = {
     "fabrizio": {
         "name": "M.~Fabrizio",
         "name_arxiv": "M. Fabrizio",
-        "email": "michele.fabrizio@ssdc.asi.it",
+        "email": "michele.fabrizio@inaf.it",
         "orcid": "0000-0001-5829-111X",
         "affiliations": ["oa_roma", "ssdc"],
     },
